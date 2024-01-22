@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StepWise Progress Bar</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            word-wrap: break-word;
+            height: 100vh;
+            margin: 0;
+            font-size: 30%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 3rem;
+            position: relative;
+            letter-spacing: 4px;
+        }
+
+        h1::before,
+        h1::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            width: 100%;
+            color: #00f0ff;
+            opacity: 0.8;
+            z-index: -1;
+            animation: flicker 2s infinite alternate-reverse;
+        }
+
+        h1::before {
+            color: #e80c7a;
+            animation-delay: 1s;
+        }
+
+        @keyframes flicker {
+
+            0%,
+            100% {
+                opacity: 0.8;
+                text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+            }
+
+            50% {
+                opacity: 0.5;
+                text-shadow: 0 0 20px rgba(0, 240, 255, 0.8),
+                    0 0 30px rgba(0, 240, 255, 0.8),
+                    0 0 40px rgba(0, 240, 255, 0.8);
+            }
+        }
+
+        ul {
+            display: flex;
+            z-index: 10;
+            width: 100%;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 0;
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+
+        ul li {
+            list-style: none;
+            height: 30px;
+            width: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ccc;
+            color: black;
+            border-radius: 100%;
+            margin-right: 20px;
+            font-size: 1rem;
+            transition: background 10s linear;
+            transition: transform 0.4s linear;
+        }
+
+        ul li:hover {
+            transform: scale(1.1);
+            cursor: grab;
+        }
+
+        ul li.active {
+            background-color: #4bb543;
+            color: white;
+            box-shadow: 0px 0px 18px #4bb543;
+        }
+
+        .wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            width: 80%;
+            margin: 150px auto;
+        }
+
+        .line2 {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            display: flex;
+            align-items: center;
+
+        }
+
+        .line-2 {
+            height: 5px;
+            width: calc(100% - 40px);
+            position: relative;
+            left: 10px;
+            background-color: #ccc;
+        }
+
+        .line {
+            width: 2px;
+            height: 0;
+            position: absolute;
+            background-color: #4bb543;
+            z-index: 9;
+        }
+
+        .animate-line .line {
+            height: 100%;
+        }
+
+        @media (max-width: 769px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            ul li {
+                margin-right: 0;
+                margin-bottom: 10px;
+
+            }
+
+            .wrapper {
+                flex-direction: column;
+            }
+
+            .line2 {
+                height: 100%;
+                left: 0;
+                z-index: 0;
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+            }
+
+            .line-2 {
+                height: calc(100% - 40px);
+                width: 5px;
+                left: 0;
+            }
+
+            .line {
+                width: 5px !important;
+                height: 2px;
+                transition: height 0.6s linear;
+            }
+
+            .animate-line .line {
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 769px) {
+            ul {
+                flex-direction: row;
+                /* Stack items horizontally on larger screens */
+            }
+
+            .wrapper {
+                flex-direction: row;
+                /* Stack items horizontally on larger screens */
+            }
+
+            .line {
+                width: 2px;
+                height: 5px !important;
+                transition: width 0.6s linear;
+            }
+
+            .animate-line .line {
+                height: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Step Wise Progress Bar</h1>
+    <div class="wrapper">
+        <ul class="ul">
+            <li class="active">1</li>
+            <li class="active">2</li>
+            <li class="">3</li>
+            <li class="">4</li>
+            <li class="">5</li>
+            <li class="">6</li>
+            <li class="">7</li>
+        </ul>
+        <div class="line" id="activeLine"></div>
+        <div class="line2">
+            <div class="line-2"></div>
+        </div>
+    </div>
+
+    <!-- script -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            updateActiveLine(); // Call when the page loads
+
+            // Update active line on window resize
+            window.addEventListener("resize", updateActiveLine);
+
+            // Click event listener to add animation class
+            const wrapper = document.querySelector('.wrapper');
+            wrapper.addEventListener('click', function () {
+                wrapper.classList.add('animate-line');
+            });
+
+            // Click event listener for li elements
+            const liElements = document.querySelectorAll('.wrapper .ul li');
+            liElements.forEach((li, index) => {
+                li.addEventListener('click', function () {
+                    // Remove active class from all li elements
+                    liElements.forEach(li => li.classList.remove('active', 'box-shadow'));
+
+                    // Add active class to the clicked li and all previous li elements
+                    for (let i = 0; i <= index; i++) {
+                        liElements[i].classList.add('active');
+                        // Add box shadow to each li when the line crosses
+                        liElements[i].classList.add('box-shadow');
+                    }
+
+                    // Call the function to update the active line
+                    updateActiveLine();
+                });
+            });
+
+            function updateActiveLine() {
+                const activeItems = document.querySelectorAll(".wrapper .ul li.active");
+                const firstActiveItem = activeItems[0];
+                const lastActiveItem = activeItems[activeItems.length - 1];
+
+                if (firstActiveItem && lastActiveItem) {
+                    const wrapperRect = document.querySelector(".wrapper").getBoundingClientRect();
+                    const firstRect = firstActiveItem.getBoundingClientRect();
+                    const lastRect = lastActiveItem.getBoundingClientRect();
+
+                    let topOffset, bottomOffset, leftOffset, rightOffset, lineHeight;
+
+                    if (window.innerWidth <= 768) {
+                        topOffset = firstRect.top - wrapperRect.top;
+                        bottomOffset = wrapperRect.bottom - lastRect.bottom;
+                        lineHeight = wrapperRect.height - topOffset - bottomOffset;
+
+                        const line = document.getElementById("activeLine");
+                        line.style.height = `${lineHeight}px`;
+                        line.style.transform = `translateY(${topOffset}px)`;
+                    } else {
+                        leftOffset = firstRect.left - wrapperRect.left;
+                        rightOffset = wrapperRect.right - lastRect.right;
+                        lineHeight = wrapperRect.width - leftOffset - rightOffset;
+
+                        const line = document.getElementById("activeLine");
+                        line.style.width = `${lineHeight}px`;
+                        line.style.transform = `translateX(${leftOffset}px)`;
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
